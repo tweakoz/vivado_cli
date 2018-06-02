@@ -15,7 +15,7 @@ set_property IOSTANDARD LVCMOS33 [get_ports rgb_led_tri_o_1]
 set_property IOSTANDARD LVCMOS33 [get_ports rgb_led_tri_o_2]
 
 set_property PACKAGE_PIN L17 [get_ports sys_clock]
-set_property PACKAGE_PIN J1 [get_ports phin]
+set_property PACKAGE_PIN M3 [get_ports phin]
 set_property PACKAGE_PIN A17 [get_ports led0]
 set_property PACKAGE_PIN B17 [get_ports rgb_led_tri_o_0]
 set_property PACKAGE_PIN B16 [get_ports rgb_led_tri_o_1]
