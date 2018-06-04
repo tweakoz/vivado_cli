@@ -1,1 +1,3 @@
 .*
+__pycache__
+usage_statistics_*

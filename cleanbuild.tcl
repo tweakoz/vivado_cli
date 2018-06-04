@@ -1,5 +1,5 @@
 puts "what up yo"
-set outputDir ./.gen
+set outputDir ./.build
 file mkdir $outputDir
 read_verilog [ glob ./src/*.v ]
 read_xdc ./src/p2.xdc
