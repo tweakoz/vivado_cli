@@ -80,33 +80,37 @@ class P2(Module):
     ]
 
     self.sync += [
-
       If( sig_uart_counter_zero,[
-          
           clk_uart.eq(~clk_uart),
-          
-          #reg_uart_counter.eq(333333), # 300 baud @ 100mhz
           reg_uart_counter.eq(self.baudticks), # 300 baud @ 12mhz
-          If(reg_uart_bit==0,[
-            reg_uart_bit.eq(9),
-            reg_uart_data.eq(65), # hex: 41 bin: 0100.0001
-            reg_uart_out.eq(0), # start bit
-          ])
-          .Else([
-            reg_uart_bit.eq(reg_uart_bit-1),
-            If(reg_uart_bit==9,
-              reg_uart_out.eq(1) # stop bit
-            ) 
-            .Else([
-              reg_uart_out.eq(reg_uart_data[0]), # data bit
-              reg_uart_data.eq(Cat(reg_uart_data[1:8],0))
-            ])
-          ])
       ])
       .Else(
           reg_uart_counter.eq(reg_uart_counter-1)
       )
     ]
+
+    ###############################
+
+    self.clock_domains.uart_clock = ClockDomain()
+
+    self.sync.uart_clock += [
+      If(reg_uart_bit==0,[
+        reg_uart_bit.eq(9),
+        reg_uart_data.eq(65), # hex: 41 bin: 0100.0001
+        reg_uart_out.eq(0), # start bit
+      ])
+      .Else([
+        reg_uart_bit.eq(reg_uart_bit-1),
+        If(reg_uart_bit==9,
+          reg_uart_out.eq(1) # stop bit
+        ) 
+        .Else([
+          reg_uart_out.eq(reg_uart_data[0]), # data bit
+          reg_uart_data.eq(Cat(reg_uart_data[1:8],0))
+        ])
+      ])
+    ]
+
 
     ###############################
 
@@ -148,7 +152,8 @@ if __name__ == "__main__":
     dut = P2(platform=platform)
     run_simulation( dut,
                     counter_test(dut),
-                    vcd_name="p2.vcd" )
+                    vcd_name="p2.vcd",
+                    clocks={"sys":10} )
     pass
   ############################
   elif args.build:
