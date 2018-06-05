@@ -24,9 +24,11 @@ class P2(Module):
     inp_sw0 = platform.request("sw0")
     out_led0 = platform.request("led0")
     out_led1 = platform.request("led1")
-    out_led2 = platform.request("led2")
-    out_led3 = platform.request("led3")
-    out_led4 = platform.request("led4")
+    out_pmod1 = platform.request("pmod1")
+    out_pmod2 = platform.request("pmod2")
+    #out_led2 = platform.request("led2")
+    #out_led3 = platform.request("led3")
+    #out_led4 = platform.request("led4")
     out_ledR = platform.request("ledR")
     out_ledG = platform.request("ledG")
     out_ledB = platform.request("ledB")
@@ -48,9 +50,9 @@ class P2(Module):
     self.comb += [
       out_led0.eq(clk_uart),
       out_led1.eq(reg_uart_bit[0]),
-      out_led2.eq(reg_uart_bit[1]),
-      out_led3.eq(reg_uart_bit[2]),
-      out_led4.eq(reg_uart_out),
+      #out_led2.eq(reg_uart_bit[1]),
+      #out_led3.eq(reg_uart_bit[2]),
+      #out_led4.eq(reg_uart_out),
       out_ledR.eq(reg_counter[24]),
       out_ledG.eq(reg_counter[25]),
       out_ledB.eq(reg_counter[26]),
@@ -67,7 +69,9 @@ class P2(Module):
     self.comb += [
       sig_uart_counter_zero.eq(reg_uart_counter==0),
       reg_uart_databit.eq(reg_uart_bit-1),
-      self.tx.eq(reg_uart_out)
+      self.tx.eq(reg_uart_out),
+      out_pmod1.eq(clk_uart),
+      out_pmod2.eq(reg_uart_out),
     ]
 
     self.sync += [
@@ -76,10 +80,11 @@ class P2(Module):
           
           clk_uart.eq(~clk_uart),
           
-          reg_uart_counter.eq(333333), # 300 baud @ 100mhz
+          #reg_uart_counter.eq(333333), # 300 baud @ 100mhz
+          reg_uart_counter.eq(20000), # 300 baud @ 12mhz
           If(reg_uart_bit==0,[
             reg_uart_bit.eq(9),
-            reg_uart_data.eq(65),
+            reg_uart_data.eq(65), # hex: 41 bin: 0100.0001
             reg_uart_out.eq(0), # start bit
           ])
           .Else([

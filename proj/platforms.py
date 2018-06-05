@@ -23,11 +23,14 @@ class CmodA735t(XilinxPlatform):
       [ genio("sysclock","L17","LVCMOS33"), # 100mhz xtal
         genio("sw0","M3","LVCMOS33"), # PIO0
         genio("led0","A17","LVCMOS33"),
+        genio("led1","C16","LVCMOS33"),
         genio("ledR","B17","LVCMOS33"),
         genio("ledG","B16","LVCMOS33"),
         genio("ledB","C17","LVCMOS33"),
         genio("pc_tx","J17","LVCMOS33"),
         genio("pc_rx","J18","LVCMOS33"),
+        genio("pmod1","G17","LVCMOS33"),
+        genio("pmod2","G19","LVCMOS33"),
       ],
       toolchain="vivado" )
 
@@ -53,6 +56,8 @@ class ArtyA735t(XilinxPlatform):
         genio("ledB","E1","LVCMOS33"), # LD0b
         genio("pc_tx","A9","LVCMOS33"),
         genio("pc_rx","D10","LVCMOS33"),
+        genio("pmod1","G17","LVCMOS33"),
+        genio("pmod2","G19","LVCMOS33"),
       ],
       toolchain="vivado" )
 
@@ -78,5 +83,7 @@ class Nexys4(XilinxPlatform):
         genio("ledB","L16","LVCMOS33"),
         genio("pc_tx","C4","LVCMOS33"),
         genio("pc_rx","D4","LVCMOS33"),
+        genio("pmod1","G17","LVCMOS33"),
+        genio("pmod2","G19","LVCMOS33"),
       ],
       toolchain="vivado" )
