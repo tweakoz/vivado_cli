@@ -19,6 +19,7 @@ class CmodA735t(XilinxPlatform):
   default_clk_name = "sysclock"
   default_clk_period = 83.333333 # 12mhz
   def __init__(self):
+    self.prog_cmd = "djtgcfg prog --verbose -d CmodA7 -i 0 -f ./.migen/p2.bit"
     XilinxPlatform.__init__(
       self,
       "xc7a35tcpg236-1", 
@@ -33,10 +34,30 @@ class CmodA735t(XilinxPlatform):
 
 #################################################
 
+class ArtyA735t(XilinxPlatform):
+  default_clk_name = "sysclock"
+  default_clk_period = 10 # 8mhz
+  def __init__(self):
+    self.prog_cmd = "djtgcfg prog --verbose -d Arty -i 0 -f ./.migen/p2.bit"
+    XilinxPlatform.__init__(
+      self,
+      "xc7a35ticsg324-1L", 
+      [ genio("sysclock","E3","LVCMOS33"), # 100mhz xtal
+        genio("sw0","A8","LVCMOS33"), # SW0
+        genio("led0","H5","LVCMOS33"), # LD4
+        genio("ledR","G6","LVCMOS33"), # LD0r
+        genio("ledG","F6","LVCMOS33"), # LD0g
+        genio("ledB","E1","LVCMOS33"), # LD0b
+      ],
+      toolchain="vivado" )
+
+#################################################
+
 class Nexys4(XilinxPlatform):
   default_clk_name = "sysclock"
   default_clk_period = 10 # 100mhz
   def __init__(self):
+    self.prog_cmd = "djtgcfg prog --verbose -d Nexys4 -i 0 -f ./.migen/p2.bit"
     XilinxPlatform.__init__(
       self,
       "xc7a100t-CSG324-1", 
@@ -82,29 +103,40 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("--build", help="generate .bit file", action="store_true")
   parser.add_argument("--progj", help="program device (jtag)", action="store_true")
-  parser.add_argument("--platform", help="platform [nexys4 or cmoda7]", action="store", default="nexys4")
+  parser.add_argument("--platform", help="platform [nexys4,cmoda7,artya7]", action="store", default="nexys4")
 
   args = parser.parse_args()
 
-  if args.build:
+  ############################
+  # determine platform
+  ############################
 
-    if args.platform == "nexys4":
-        platform = Nexys4()
-    else:
-        platform = CmodA735t()
+  if args.platform == "nexys4":
+      platform = Nexys4()
+  elif args.platform == "artya7":
+      platform = ArtyA735t()
+  elif args.platform == "cmoda7":
+      platform = CmodA735t()
+
+  ############################
+  if args.build: # build ?
+  ############################
 
     instance = P2(platform=platform)
     platform.build( instance,
                     build_dir=".migen",
                     build_name="p2" )
-  elif args.progj:
 
-    if args.platform == "nexys4":
-        os.system("djtgcfg prog --verbose -d Nexys4 -i 0 -f ./.migen/p2.bit")
-    else:
-        os.system("djtgcfg prog --verbose-d CmodA7 -i 0 -f ./.migen/p2.bit")
+  ############################
+  elif args.progj: # program ?
+  ############################
 
-  else:
+    os.system(platform.prog_cmd)
+
+  ############################
+  else: # help ?
+  ############################
+
     parser.print_help()
 
   #convert(instance).write("p2.v")
