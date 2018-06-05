@@ -1,62 +1,17 @@
 #!/usr/bin/env python3
 
 import sys, argparse
+from os import path
+par_dir = path.dirname( path.dirname( path.abspath(__file__) ) )
+sys.path.append( par_dir )
+
 from migen import *
 from migen.genlib.fsm import *
 
 from migen.build.generic_platform import *
-from migen.build.xilinx import XilinxPlatform
-from migen.build.generic_platform import GenericPlatform
 from migen.build.xilinx import vivado
 
-#################################################
-
-def genio(name,pin,iostd):
- return ( name, 0, Pins(pin), IOStandard(iostd) )
-
-#################################################
-
-class CmodA735t(XilinxPlatform):
-  default_clk_name = "sysclock"
-  default_clk_period = 83.333333 # 12mhz
-  def __init__(self):
-    XilinxPlatform.__init__(
-      self,
-      "xc7a35tcpg236-1", 
-      [ genio("sysclock","L17","LVCMOS33"), # 100mhz xtal
-        genio("sw0","M3","LVCMOS33"), # PIO0
-        genio("led0","A17","LVCMOS33"),
-        genio("ledR","B17","LVCMOS33"),
-        genio("ledG","B16","LVCMOS33"),
-        genio("ledB","C17","LVCMOS33"),
-        genio("uart_tx","J17","LVCMOS33"),
-        genio("uart_rx","J18","LVCMOS33"),
-      ],
-      toolchain="vivado" )
-
-#################################################
-
-class Nexys4(XilinxPlatform):
-  default_clk_name = "sysclock"
-  default_clk_period = 10 # 100mhz
-  def __init__(self):
-    XilinxPlatform.__init__(
-      self,
-      "xc7a100t-CSG324-1", 
-      [ genio("sysclock","E3","LVCMOS33"), # 100mhz xtal
-        genio("sw0","U9","LVCMOS33"), # SW0
-        genio("led0","T8","LVCMOS33"),
-        genio("led1","V9","LVCMOS33"),
-        genio("led2","R8","LVCMOS33"),
-        genio("led3","T6","LVCMOS33"),
-        genio("led4","T5","LVCMOS33"),
-        genio("ledR","K6","LVCMOS33"),
-        genio("ledG","H6","LVCMOS33"),
-        genio("ledB","L16","LVCMOS33"),
-        genio("pc_tx","C4","LVCMOS33"),
-        genio("pc_rx","D4","LVCMOS33"),
-      ],
-      toolchain="vivado" )
+import platforms
 
 #################################################
 
@@ -159,23 +114,32 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
 
-  if args.build:
+  ############################
+  # determine platform
+  ############################
 
-    if args.platform == "nexys4":
-        platform = Nexys4()
-    else:
-        platform = CmodA735t()
+  if args.platform == "nexys4":
+      platform = platforms.Nexys4()
+  elif args.platform == "artya7":
+      platform = platforms.ArtyA735t()
+  elif args.platform == "cmoda7":
+      platform = platforms.CmodA735t()
+
+  assert( platform!=None )
+  
+  ############################
+  if args.build:
+  ############################
 
     instance = P2(platform=platform)
     platform.build( instance,
                     build_dir=".migen",
                     build_name="p2" )
+  ############################
   elif args.progj:
+  ############################
 
-    if args.platform == "nexys4":
-        os.system("djtgcfg prog --verbose -d Nexys4 -i 0 -f ./.migen/p2.bit")
-    else:
-        os.system("djtgcfg prog --verbose-d CmodA7 -i 0 -f ./.migen/p2.bit")
+    os.system(platform.prog_cmd)
 
   else:
     parser.print_help()
