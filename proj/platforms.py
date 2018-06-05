@@ -12,9 +12,39 @@ def genio(name,pin,iostd):
 
 #################################################
 
+class Sim1mhz(XilinxPlatform):
+  default_clk_name = "sysclock"
+  #default_clk_period = 83.333333 # 12mhz
+  default_clk_period = 1000000 # 100khz
+  def __init__(self):
+    self.clock_period = Sim1mhz.default_clk_period
+    self.clock_rate = 1e11/Sim1mhz.default_clk_period
+    print("ClockPeriod<%f ns>"%self.clock_period)
+    print("ClockRate<%f Mhz>"%(self.clock_rate/1e6))
+    self.prog_cmd = "djtgcfg prog --verbose -d CmodA7 -i 0 -f ./.migen/p2.bit"
+    XilinxPlatform.__init__(
+      self,
+      "xc7a35tcpg236-1", 
+      [ genio("sysclock","L17","LVCMOS33"), # 100mhz xtal
+        genio("sw0","M3","LVCMOS33"), # PIO0
+        genio("led0","A17","LVCMOS33"),
+        genio("led1","C16","LVCMOS33"),
+        genio("ledR","B17","LVCMOS33"),
+        genio("ledG","B16","LVCMOS33"),
+        genio("ledB","C17","LVCMOS33"),
+        genio("pc_tx","J17","LVCMOS33"),
+        genio("pc_rx","J18","LVCMOS33"),
+        genio("pmod1","G17","LVCMOS33"),
+        genio("pmod2","G19","LVCMOS33"),
+      ],
+      toolchain="vivado" )
+
+#################################################
+
 class CmodA735t(XilinxPlatform):
   default_clk_name = "sysclock"
-  default_clk_period = 83.333333 # 12mhz
+  #default_clk_period = 83.333333 # 12mhz
+  default_clk_period = 8333.3333 # 12mhz
   def __init__(self):
     self.prog_cmd = "djtgcfg prog --verbose -d CmodA7 -i 0 -f ./.migen/p2.bit"
     XilinxPlatform.__init__(

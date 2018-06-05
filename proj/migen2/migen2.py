@@ -18,6 +18,11 @@ import platforms
 class P2(Module):
   def __init__(self,platform):
 
+    self.baud = 300.0
+    self.baudticks = int(platform.clock_rate/self.baud)
+    print( "Baud<%d>"%self.baud)
+    print( "BaudTicks<%d>"%self.baudticks)
+
     self.rx = platform.request("pc_tx")
     self.tx = platform.request("pc_rx")
 
@@ -81,7 +86,7 @@ class P2(Module):
           clk_uart.eq(~clk_uart),
           
           #reg_uart_counter.eq(333333), # 300 baud @ 100mhz
-          reg_uart_counter.eq(20000), # 300 baud @ 12mhz
+          reg_uart_counter.eq(self.baudticks), # 300 baud @ 12mhz
           If(reg_uart_bit==0,[
             reg_uart_bit.eq(9),
             reg_uart_data.eq(65), # hex: 41 bin: 0100.0001
@@ -113,6 +118,7 @@ if __name__ == "__main__":
   from migen.fhdl.verilog import convert
 
   parser = argparse.ArgumentParser()
+  parser.add_argument("--sim", help="simulate", action="store_true")
   parser.add_argument("--build", help="generate .bit file", action="store_true")
   parser.add_argument("--progj", help="program device (jtag)", action="store_true")
   parser.add_argument("--platform", help="platform [nexys4 or cmoda7]", action="store", default="nexys4")
@@ -133,7 +139,19 @@ if __name__ == "__main__":
   assert( platform!=None )
   
   ############################
-  if args.build:
+  if args.sim:
+  ############################
+    platform = platforms.Sim1mhz()
+    def counter_test(dut):
+          for i in range(10000):
+            yield  # next clock cycle
+    dut = P2(platform=platform)
+    run_simulation( dut,
+                    counter_test(dut),
+                    vcd_name="p2.vcd" )
+    pass
+  ############################
+  elif args.build:
   ############################
 
     instance = P2(platform=platform)
