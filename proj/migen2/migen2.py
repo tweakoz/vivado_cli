@@ -161,6 +161,7 @@ if __name__ == "__main__":
     run_simulation( dut,
                     counter_test(dut),
                     vcd_name="p2.vcd" )
+    os.system("gtkwave -a p2.gtkw p2.vcd")
     pass
   ############################
   elif args.build:
