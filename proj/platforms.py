@@ -46,6 +46,8 @@ class CmodA735t(XilinxPlatform):
   #default_clk_period = 83.333333 # 12mhz
   default_clk_period = 8333.3333 # 12mhz
   def __init__(self):
+    self.clock_period = CmodA735t.default_clk_period
+    self.clock_rate = 1e11/CmodA735t.default_clk_period
     self.prog_cmd = "djtgcfg prog --verbose -d CmodA7 -i 0 -f ./.migen/p2.bit"
     XilinxPlatform.__init__(
       self,
@@ -70,6 +72,8 @@ class ArtyA735t(XilinxPlatform):
   default_clk_name = "sysclock"
   default_clk_period = 10 # 8mhz
   def __init__(self):
+    self.clock_period = ArtyA735t.default_clk_period
+    self.clock_rate = 1e11/ArtyA735t.default_clk_period
     self.prog_cmd = "djtgcfg prog --verbose -d Arty -i 0 -f ./.migen/p2.bit"
     XilinxPlatform.__init__(
       self,
@@ -97,6 +101,8 @@ class Nexys4(XilinxPlatform):
   default_clk_name = "sysclock"
   default_clk_period = 10 # 100mhz
   def __init__(self):
+    self.clock_period = Nexys4.default_clk_period
+    self.clock_rate = 1e11/Nexys4.default_clk_period
     self.prog_cmd = "djtgcfg prog --verbose -d Nexys4 -i 0 -f ./.migen/p2.bit"
     XilinxPlatform.__init__(
       self,

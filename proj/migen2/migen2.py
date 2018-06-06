@@ -19,7 +19,7 @@ class P2(Module):
   def __init__(self,platform):
 
     self.baud = 300.0
-    self.baudticks = int(platform.clock_rate/self.baud)
+    self.baudticks = int(0.5*platform.clock_rate/self.baud)
     print( "Baud<%d>"%self.baud)
     print( "BaudTicks<%d>"%self.baudticks)
 
@@ -79,6 +79,8 @@ class P2(Module):
       out_pmod2.eq(reg_uart_out),
     ]
 
+    character = Signal(4)
+
     self.sync += [
 
       If( sig_uart_counter_zero,[
@@ -91,14 +93,15 @@ class P2(Module):
               If(reg_uart_bit==9,[
 
                   reg_uart_bit.eq(0),
-                  reg_uart_data.eq(65+reg_counter[0:3]), # hex: 41 bin: 0100.0001
+                  reg_uart_data.eq(65+character), # hex: 41 bin: 0100.0001
                   reg_uart_out.eq(0), # start bit
 
               ])
               .Else([
               
                   If(reg_uart_bit==8,
-                      reg_uart_out.eq(1) # stop bit
+                      reg_uart_out.eq(1), # stop bit
+                      character.eq(character+1)
                   ) 
                   .Else([
                       reg_uart_out.eq(reg_uart_data[0]), # data bit
