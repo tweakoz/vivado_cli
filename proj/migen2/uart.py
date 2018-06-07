@@ -80,26 +80,24 @@ class TX(Module):
 
           If(clk_uart.clk,[
 
-              If(reg_uart_bit==9,[
-
-                  reg_uart_bit.eq(0),
-                  reg_uart_out.eq(0), # start bit
-                  reg_uart_data.eq(self.inp_data), # latch character data
-              ])
-              .Else([
-              
-                  If(reg_uart_bit==8,
-                      reg_uart_out.eq(1), # stop bit
-	                  self.inp_wr.eq(0),
-                  ) 
-                  .Else([
+              Case(reg_uart_bit,{
+                  "default":[ # DATA
+                      # shift data byte into output
                       reg_uart_out.eq(reg_uart_data[0]), # data bit
-                      reg_uart_data.eq(Cat(reg_uart_data[1:8],0))
-                  ]),
-
-                  reg_uart_bit.eq(reg_uart_bit+1),
-
-              ])
+                      reg_uart_data.eq(Cat(reg_uart_data[1:8],0)),
+                      reg_uart_bit.eq(reg_uart_bit+1),
+                  ],
+                  8:[ # STOP
+                      reg_uart_out.eq(1), # stop bit
+                      self.inp_wr.eq(0),
+                      reg_uart_bit.eq(reg_uart_bit+1),
+                  ],
+                  9:[ # START
+                      reg_uart_out.eq(0), # start bit
+                      reg_uart_data.eq(self.inp_data), # latch character data
+                      reg_uart_bit.eq(0),
+                  ]
+              })
           ])
 
       ])
