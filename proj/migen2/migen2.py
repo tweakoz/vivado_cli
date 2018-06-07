@@ -7,36 +7,24 @@ sys.path.append( par_dir )
 
 from migen import *
 from migen.genlib.fsm import *
+#from migen.fhdl.std import *
+#from migen.sim.generic import run_simulation, Simulator, TopLevel
+#from migen.sim.icarus import Runner
 
 from migen.build.generic_platform import *
 from migen.build.xilinx import vivado
 
 import platforms
+import uart
 
 #################################################
 
-class P2(Module):
-  def __init__(self,platform):
+class LEDS(Module):
+  def __init__(self,top):
 
-    self.baud = 300.0
-    self.baudticks = int(0.5*platform.clock_rate/self.baud)
-    print( "Baud<%d>"%self.baud)
-    print( "BaudTicks<%d>"%self.baudticks)
-
-    self.rx = platform.request("pc_tx")
-    self.tx = platform.request("pc_rx")
-
-    inp_sw0 = platform.request("sw0")
-    out_led0 = platform.request("led0")
-    out_led1 = platform.request("led1")
-    out_pmod1 = platform.request("pmod1")
-    out_pmod2 = platform.request("pmod2")
-    #out_led2 = platform.request("led2")
-    #out_led3 = platform.request("led3")
-    #out_led4 = platform.request("led4")
-    out_ledR = platform.request("ledR")
-    out_ledG = platform.request("ledG")
-    out_ledB = platform.request("ledB")
+    out_ledR = top.platform.request("ledR")
+    out_ledG = top.platform.request("ledG")
+    out_ledB = top.platform.request("ledB")
 
     reg_counter = Signal(32)
 
@@ -44,86 +32,66 @@ class P2(Module):
     # MAIN
     ###############################
 
-    reg_uart_counter = Signal(32)
-    reg_uart_data = Signal(8)
-    reg_uart_bit = Signal(4)
-    reg_uart_databit = Signal(4)
-    reg_uart_out = Signal()
-    clk_uart = Signal()
-    sig_uart_counter_zero = Signal()
-
     self.comb += [
-      out_led0.eq(clk_uart),
-      out_led1.eq(reg_uart_bit[0]),
-      #out_led2.eq(reg_uart_bit[1]),
-      #out_led3.eq(reg_uart_bit[2]),
-      #out_led4.eq(reg_uart_out),
       out_ledR.eq(reg_counter[24]),
       out_ledG.eq(reg_counter[25]),
       out_ledB.eq(reg_counter[26]),
     ]
 
-    self.sync += [
+    top.sync.clk_sys += [
       reg_counter.eq(reg_counter+1)
-    ]
-
-    ###############################
-    # UART 
-    ###############################
-
-    self.comb += [
-      sig_uart_counter_zero.eq(reg_uart_counter==0),
-      reg_uart_databit.eq(reg_uart_bit),
-      self.tx.eq(reg_uart_out),
-      out_pmod1.eq(clk_uart),
-      out_pmod2.eq(reg_uart_out),
-    ]
-
-    character = Signal(4)
-
-    self.sync += [
-
-      If( sig_uart_counter_zero,[
-
-          clk_uart.eq(~clk_uart),
-          reg_uart_counter.eq(self.baudticks), # 300 baud @ 12mhz
-
-          If(clk_uart,[
-
-              If(reg_uart_bit==9,[
-
-                  reg_uart_bit.eq(0),
-                  reg_uart_data.eq(65+character), # hex: 41 bin: 0100.0001
-                  reg_uart_out.eq(0), # start bit
-
-              ])
-              .Else([
-              
-                  If(reg_uart_bit==8,
-                      reg_uart_out.eq(1), # stop bit
-                      character.eq(character+1)
-                  ) 
-                  .Else([
-                      reg_uart_out.eq(reg_uart_data[0]), # data bit
-                      reg_uart_data.eq(Cat(reg_uart_data[1:8],0))
-                  ]),
-
-                  reg_uart_bit.eq(reg_uart_bit+1),
-
-              ])
-          ])
-
-      ])
-      .Else(
-          reg_uart_counter.eq(reg_uart_counter-1)
-      )
-
     ]
 
     ###############################
 
 #################################################
-# build-driver
+
+class TOP(Module):
+  def __init__(self,platform,sysclock):
+    self.sysclock = sysclock
+    self.platform = platform
+    self.clock_domains.clk_sys = ClockDomain("clk_sys")
+
+    tx = self.submodules.tx = uart.TX(self,baudrate=300)
+    leds = self.submodules.leds = LEDS(self)
+
+    character = Signal(5)
+
+    ###############################
+    # character stream
+    ###############################
+
+    mystr = "WhatUpYo... "
+
+    self.specials.mrom = Memory(8, len(mystr), init=[ord(s) for s in list(mystr)])
+
+    rom_port1 = self.mrom.get_port(has_re=False,
+                                   async_read=True,
+                                   clock_domain="clk_sys")
+
+    self.specials += [rom_port1]
+
+    self.comb += [
+      self.clk_sys.clk.eq(self.sysclock),
+      rom_port1.adr.eq(character),
+      tx.inp_data.eq(rom_port1.dat_r),
+    ]
+
+    self.sync.clk_sys += [
+
+        If(tx.inp_wr==0,[
+          If( character==len(mystr)-1, [
+            character.eq(0)
+          ])
+          .Else([
+            character.eq(character+1)
+          ]),
+          tx.inp_wr.eq(1)
+        ])
+    ]
+
+#################################################
+# driver
 #################################################
 
 if __name__ == "__main__":
@@ -138,44 +106,56 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   ############################
-  # determine platform
+  if args.sim: # Simulation ?
   ############################
 
-  if args.platform == "nexys4":
-      platform = platforms.Nexys4()
-  elif args.platform == "artya7":
-      platform = platforms.ArtyA735t()
-  elif args.platform == "cmoda7":
-      platform = platforms.CmodA735t()
+    convert(TOP(platforms.Sim1mhz(),Signal())).write(".migen/p2.v")
+    dut = TOP(platforms.Sim1mhz(),Signal())
 
-  assert( platform!=None )
-  
-  ############################
-  if args.sim:
-  ############################
-    platform = platforms.Sim1mhz()
-    def counter_test(dut):
-          for i in range(30000):
-            yield  # next clock cycle
-    dut = P2(platform=platform)
-    run_simulation( dut,
-                    counter_test(dut),
-                    vcd_name="p2.vcd" )
+    def testbench():
+        print("wtf...")
+        yield 
+
+    #dut.clock_domains.cd_sys = ClockDomain("clk_sys")
+
+    mysim = Simulator(dut,
+                      testbench(),
+                      clocks={
+                        "clk_sys": 100000,
+                        "sys":10
+                      },
+                      vcd_name="p2.vcd",
+                      special_overrides={})
+
+    mysim.run()
+
     os.system("gtkwave -a p2.gtkw p2.vcd")
     pass
+
   ############################
-  elif args.build:
+  else: # Build, Program or Help ?
   ############################
 
-    instance = P2(platform=platform)
-    platform.build( instance,
-                    build_dir=".migen",
-                    build_name="p2" )
-  ############################
-  elif args.progj:
-  ############################
+    # determine platform
 
-    os.system(platform.prog_cmd)
+    if args.platform == "nexys4":
+        platform = platforms.Nexys4()
+    elif args.platform == "artya7":
+        platform = platforms.ArtyA735t()
+    elif args.platform == "cmoda7":
+        platform = platforms.CmodA735t()
 
-  else:
-    parser.print_help()
+    assert( platform!=None )
+    
+    ###########
+
+    if args.build:
+      sysclock = platform.request("sysclock")
+      instance = TOP(platform,sysclock)
+      platform.build( instance,
+                      build_dir=".migen",
+                      build_name="p2" )
+    elif args.progj:
+      os.system(platform.prog_cmd)
+    else:
+      parser.print_help()

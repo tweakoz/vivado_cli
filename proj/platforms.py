@@ -14,11 +14,11 @@ def genio(name,pin,iostd):
 
 class Sim1mhz(XilinxPlatform):
   default_clk_name = "sysclock"
-  #default_clk_period = 83.333333 # 12mhz
-  default_clk_period = 1000000 # 100khz
+  default_clk_mhz = .01
+  default_clk_period = 1000/default_clk_mhz # 100khz
   def __init__(self):
     self.clock_period = Sim1mhz.default_clk_period
-    self.clock_rate = 1e11/Sim1mhz.default_clk_period
+    self.clock_rate = 1e9/Sim1mhz.default_clk_period
     print("ClockPeriod<%f ns>"%self.clock_period)
     print("ClockRate<%f Mhz>"%(self.clock_rate/1e6))
     self.prog_cmd = "djtgcfg prog --verbose -d CmodA7 -i 0 -f ./.migen/p2.bit"
@@ -34,8 +34,22 @@ class Sim1mhz(XilinxPlatform):
         genio("ledB","C17","LVCMOS33"),
         genio("pc_tx","J17","LVCMOS33"),
         genio("pc_rx","J18","LVCMOS33"),
-        genio("pmod1","G17","LVCMOS33"),
-        genio("pmod2","G19","LVCMOS33"),
+        genio("pmodA0","G17","LVCMOS33"),
+        genio("pmodA1","G19","LVCMOS33"),
+        genio("pmodA2","N18","LVCMOS33"),
+        genio("pmodA3","L18","LVCMOS33"),
+        genio("pmodA4","H17","LVCMOS33"),
+        genio("pmodA5","H19","LVCMOS33"),
+        genio("pmodA6","J19","LVCMOS33"),
+        genio("pmodA7","K18","LVCMOS33"),
+        genio("gpio0","M3","LVCMOS33"),   # PIO1
+        genio("gpio1","L3","LVCMOS33"),   # PIO2
+        genio("gpio2","A16","LVCMOS33"),  # PIO3
+        genio("gpio3","K3","LVCMOS33"),   # PIO4
+        genio("gpio4","C15","LVCMOS33"),  # PIO5
+        genio("gpio5","L3","LVCMOS33"),   # PIO6
+        genio("gpio6","H1","LVCMOS33"),   # PIO7
+        genio("gpio7","B15","LVCMOS33"),  # PIO8
       ],
       toolchain="vivado" )
 
@@ -53,16 +67,30 @@ class CmodA735t(XilinxPlatform):
       self,
       "xc7a35tcpg236-1", 
       [ genio("sysclock","L17","LVCMOS33"), # 100mhz xtal
-        genio("sw0","M3","LVCMOS33"), # PIO0
+        genio("sw0","V8","LVCMOS33"),     # PIO48
         genio("led0","A17","LVCMOS33"),
         genio("led1","C16","LVCMOS33"),
         genio("ledR","B17","LVCMOS33"),
         genio("ledG","B16","LVCMOS33"),
         genio("ledB","C17","LVCMOS33"),
-        genio("pc_tx","J17","LVCMOS33"),
-        genio("pc_rx","J18","LVCMOS33"),
-        genio("pmod1","G17","LVCMOS33"),
-        genio("pmod2","G19","LVCMOS33"),
+        genio("pc_tx","J17","LVCMOS33"),  # uart <- usb
+        genio("pc_rx","J18","LVCMOS33"),  # uart -> usb
+        genio("pmodA0","G17","LVCMOS33"), # pmod pin1
+        genio("pmodA1","G19","LVCMOS33"), # pmod pin2
+        genio("pmodA2","N18","LVCMOS33"), # pmod pin3
+        genio("pmodA3","L18","LVCMOS33"), # pmod pin4
+        genio("pmodA4","H17","LVCMOS33"), # pmod pin7
+        genio("pmodA5","H19","LVCMOS33"), # pmod pin8
+        genio("pmodA6","J19","LVCMOS33"), # pmod pin9
+        genio("pmodA7","K18","LVCMOS33"), # pmod pin10
+        genio("gpio0","M3","LVCMOS33"),   # PIO1
+        genio("gpio1","L3","LVCMOS33"),   # PIO2
+        genio("gpio2","A16","LVCMOS33"),  # PIO3
+        genio("gpio3","K3","LVCMOS33"),   # PIO4
+        genio("gpio4","C15","LVCMOS33"),  # PIO5
+        genio("gpio5","L3","LVCMOS33"),   # PIO6
+        genio("gpio6","H1","LVCMOS33"),   # PIO7
+        genio("gpio7","B15","LVCMOS33"),  # PIO8
       ],
       toolchain="vivado" )
 
@@ -92,6 +120,8 @@ class ArtyA735t(XilinxPlatform):
         genio("pc_rx","D10","LVCMOS33"),
         genio("pmod1","G17","LVCMOS33"),
         genio("pmod2","G19","LVCMOS33"),
+        genio("gpioX","XX","LVCMOS33"), # PIO1
+        genio("gpioY","XX","LVCMOS33"), # PIO2
       ],
       toolchain="vivado" )
 
