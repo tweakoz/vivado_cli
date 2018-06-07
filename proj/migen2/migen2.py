@@ -63,7 +63,10 @@ class TOP(Module):
 
     mystr = "WhatUpYo... "
 
-    self.specials.mrom = Memory(8, len(mystr), init=[ord(s) for s in list(mystr)])
+    self.specials.mrom = Memory( 8, # width
+                                 len(mystr), # length
+                                 init = [ord(s) for s in list(mystr)] # content
+                               )
 
     rom_port1 = self.mrom.get_port(has_re=False,
                                    async_read=True,
@@ -108,8 +111,9 @@ if __name__ == "__main__":
   ############################
   if args.sim: # Simulation ?
   ############################
-
-    convert(TOP(platforms.Sim1mhz(),Signal())).write(".migen/p2.v")
+    dut_clk = Signal()
+    dut_conv = TOP(platforms.Sim1mhz(),dut_clk)
+    convert(dut_conv,ios={dut_clk}).write(".migen/p2.v")
     dut = TOP(platforms.Sim1mhz(),Signal())
 
     def testbench():

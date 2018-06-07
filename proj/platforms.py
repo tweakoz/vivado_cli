@@ -132,7 +132,7 @@ class Nexys4(XilinxPlatform):
   default_clk_period = 10 # 100mhz
   def __init__(self):
     self.clock_period = Nexys4.default_clk_period
-    self.clock_rate = 1e11/Nexys4.default_clk_period
+    self.clock_rate = 100e6
     self.prog_cmd = "djtgcfg prog --verbose -d Nexys4 -i 0 -f ./.migen/p2.bit"
     XilinxPlatform.__init__(
       self,
@@ -149,7 +149,21 @@ class Nexys4(XilinxPlatform):
         genio("ledB","L16","LVCMOS33"),
         genio("pc_tx","C4","LVCMOS33"),
         genio("pc_rx","D4","LVCMOS33"),
-        genio("pmod1","G17","LVCMOS33"),
-        genio("pmod2","G19","LVCMOS33"),
+        genio("pmodA0","B13","LVCMOS33"), # PMOD JA1
+        genio("pmodA1","F14","LVCMOS33"), # PMOD JA2
+        genio("pmodA2","D17","LVCMOS33"), # PMOD JA3
+        genio("pmodA3","E17","LVCMOS33"), # PMOD JA4
+        genio("pmodA4","G13","LVCMOS33"), # PMOD JA7
+        genio("pmodA5","C17","LVCMOS33"), # PMOD JA8
+        genio("pmodA6","D18","LVCMOS33"), # PMOD JA9
+        genio("pmodA7","E18","LVCMOS33"), # PMOD JA10
+        genio("gpio0","G14","LVCMOS33"),  # PMOD JB1
+        genio("gpio1","P15","LVCMOS33"),  # PMOD JB2
+        genio("gpio2","V11","LVCMOS33"),  # PMOD JB3
+        genio("gpio3","V15","LVCMOS33"),  # PMOD JB4
+        genio("gpio4","K16","LVCMOS33"),  # PMOD JB7
+        genio("gpio5","R16","LVCMOS33"),  # PMOD JB8
+        genio("gpio6","T9","LVCMOS33"),   # PMOD JB9
+        genio("gpio7","U11","LVCMOS33"),  # PMOD JB10
       ],
       toolchain="vivado" )
