@@ -1,31 +1,25 @@
 [*]
 [*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Thu Jun  7 07:54:07 2018
+[*] Fri Jun  8 00:54:05 2018
 [*]
-[dumpfile] "/mnt/hgfs/projects/hw/vivado_cli/proj/migen2/p2.vcd"
-[dumpfile_mtime] "Wed Jun  6 03:25:28 2018"
-[dumpfile_size] 2804442
+[dumpfile] "/mnt/hgfs/projects/hw/vivado_cli/proj/migen2/.migen/sim.vcd"
+[dumpfile_mtime] "Fri Jun  8 00:53:40 2018"
+[dumpfile_size] 1042916
 [savefile] "/mnt/hgfs/projects/hw/vivado_cli/proj/migen2/p2.gtkw"
-[timestart] 50600
+[timestart] 0
 [size] 1373 845
 [pos] -1 -1
-*-16.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-26.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [sst_width] 327
 [signals_width] 238
 [sst_expanded] 1
 [sst_vpaned_height] 280
 @28
 sys_clk
-@23
-reg_uart_counter[31:0]
+@29
+clk_uart_clk
 @28
-sig_uart_counter_zero
-clk_uart
-@22
-reg_uart_data[7:0]
-character[3:0]
-reg_uart_bit[3:0]
-@28
+clk_char_clk
 pc_rx
 [pattern_trace] 1
 [pattern_trace] 0

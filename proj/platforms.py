@@ -15,10 +15,10 @@ def genio(name,pin,iostd):
 class Sim1mhz(XilinxPlatform):
   default_clk_name = "sysclock"
   default_clk_mhz = .01
-  default_clk_period = 1000/default_clk_mhz # 100khz
+  default_clk_period = 10000 # 100khz
   def __init__(self):
     self.clock_period = Sim1mhz.default_clk_period
-    self.clock_rate = 1e9/Sim1mhz.default_clk_period
+    self.clock_rate = 0.01e6
     print("ClockPeriod<%f ns>"%self.clock_period)
     print("ClockRate<%f Mhz>"%(self.clock_rate/1e6))
     self.prog_cmd = "djtgcfg prog --verbose -d CmodA7 -i 0 -f ./.migen/p2.bit"
@@ -57,11 +57,10 @@ class Sim1mhz(XilinxPlatform):
 
 class CmodA735t(XilinxPlatform):
   default_clk_name = "sysclock"
-  #default_clk_period = 83.333333 # 12mhz
-  default_clk_period = 8333.3333 # 12mhz
+  default_clk_period = 83.333333 # 12mhz
   def __init__(self):
     self.clock_period = CmodA735t.default_clk_period
-    self.clock_rate = 1e11/CmodA735t.default_clk_period
+    self.clock_rate = 12e6
     self.prog_cmd = "djtgcfg prog --verbose -d CmodA7 -i 0 -f ./.migen/p2.bit"
     XilinxPlatform.__init__(
       self,

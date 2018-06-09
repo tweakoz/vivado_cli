@@ -117,23 +117,18 @@ if __name__ == "__main__":
     dut = TOP(platforms.Sim1mhz(),Signal())
 
     def testbench():
-        print("wtf...")
-        yield 
+        for i in range(30000):
+          yield 
 
-    #dut.clock_domains.cd_sys = ClockDomain("clk_sys")
+    run_simulation(dut,
+                   testbench(),
+                   vcd_name=".migen/sim.vcd",
+                   clocks={
+                      "clk_sys": 100000,
+                      "sys":10000
+                  })
 
-    mysim = Simulator(dut,
-                      testbench(),
-                      clocks={
-                        "clk_sys": 100000,
-                        "sys":10
-                      },
-                      vcd_name="p2.vcd",
-                      special_overrides={})
-
-    mysim.run()
-
-    os.system("gtkwave -a p2.gtkw p2.vcd")
+    os.system("gtkwave -a p2.gtkw .migen/sim.vcd")
     pass
 
   ############################

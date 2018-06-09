@@ -25,6 +25,8 @@ class TX(Module):
     out_led1 = top.platform.request("led1")
     out_pmod0 = top.platform.request("pmodA0")
     out_pmod1 = top.platform.request("pmodA1")
+    out_pmod2 = top.platform.request("pmodA2")
+    out_pmod3 = top.platform.request("pmodA3")
     out_gpio0 = top.platform.request("gpio0")
     out_gpio1 = top.platform.request("gpio1")
     out_gpio2 = top.platform.request("gpio2")
@@ -62,8 +64,11 @@ class TX(Module):
       sig_uart_counter_zero.eq(reg_uart_counter==0),
       reg_uart_databit.eq(reg_uart_bit),
       tx.eq(reg_uart_out),
+
       out_pmod0.eq(clk_uart.clk),
       out_pmod1.eq(reg_uart_out),
+      out_pmod2.eq(clk_char.clk),
+
       out_gpio0.eq(clk_uart.clk),
       out_gpio1.eq(reg_uart_out),
       out_gpio4.eq(clk_char.clk)
